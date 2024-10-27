@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  django:
+    # Сборка образа для сервиса django из текущей директории
+    build: .
+    environment:
+      PYTHONUNBUFFERED: 1
+      SECRET_KEY: "123"
+      ACCESS_TOKEN: "123"
+      DEBUG: "1"
+      MAIN_HOST: "localhost"
+      DB_NAME: "selecto_db"
+      DB_USERNAME: "django_user"
+      DB_PASSWORD: "jayBYE_4679"
+      DB_HOST: "pgdb"
+    # Задание имени контейнера для сервиса django
+    container_name: django
+    # Задание команды, которую нужно запустить при запуске контейнера для сервиса django
+    command: sh -c 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver'
+    # Открытие порта на хостовой машине и перенаправление на порт в контейнере
+    ports:
+      - 8000:8000
+    # Зависимость от другого сервиса
+    depends_on:
+      - pgdb
+
+  pgdb:
+    # Использование готового образа postgres
+    image: postgres
+    # Задание переменных окружения для контейнера с postgres
+    environment:
+      - POSTGRES_DB=selecto_db
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=jayBYE_4679
+     # Задание имени контейнера для сервиса pgdb
+    container_name: pgdb
+     # Связывание тома с директорией в контейнере для сохранения данных postgres
+    volumes:
+      - pg_db_data:/var/lib/postgresql/data/
+
+volumes:
+  pg_db_data:
